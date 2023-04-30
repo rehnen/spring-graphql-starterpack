@@ -1,0 +1,48 @@
+plugins {
+	id 'java'
+	id 'org.springframework.boot' version '3.0.5'
+	id 'io.spring.dependency-management' version '1.1.0'
+	id "io.github.kobylynskyi.graphql.codegen" version "5.6.0"
+}
+
+group = 'com.marcusrehn'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '17'
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-graphql'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'javax.validation:validation-api:2.0.1.Final'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework:spring-webflux'
+	testImplementation 'org.springframework.graphql:spring-graphql-test'
+}
+
+tasks.named("graphqlCodegen") {
+	// all config options:
+	// https://github.com/kobylynskyi/graphql-java-codegen/blob/main/docs/codegen-options.md
+	graphqlSchemas.includePattern = "schema\\.graphqls"
+	outputDir = new File("$buildDir/generated")
+	packageName = "com.example.graphql.model"
+	customTypesMapping = [
+			DateTime: "org.joda.time.DateTime",
+	]
+	customAnnotationsMapping = [
+			DateTime: ["@com.fasterxml.jackson.databind.annotation.JsonDeserialize(using = com.example.json.EpochMillisScalarDeserializer.class)"]
+	]
+	modelNameSuffix = "TO"
+}
+
+// Automatically generate GraphQL code on project build:
+compileJava.dependsOn 'graphqlCodegen'
+
+// Add generated sources to your project source sets:
+sourceSets.main.java.srcDir "$buildDir/generated"
+
+tasks.named('test') {
+	useJUnitPlatform()
+}

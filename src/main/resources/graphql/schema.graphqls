@@ -1,0 +1,22 @@
+type Query {
+    hello: String
+    getPerson: Person
+}
+
+directive @auth(role: Role = USER) on OBJECT | FIELD_DEFINITION
+
+# directive @launch_darkly(flag: String)
+
+enum Role {
+    ADMIN
+    USER
+}
+
+type Person {
+    firstName: String!
+    lastName: String @auth(role: ADMIN)
+}
+
+
+
+
