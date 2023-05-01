@@ -1,6 +1,7 @@
 package com.marcusrehn.gqlInJava;
 
 import com.example.graphql.model.RoleTO;
+import graphql.GraphQLContext;
 import graphql.schema.DataFetcher;
 import graphql.schema.DataFetchingEnvironment;
 import graphql.schema.GraphQLFieldDefinition;
@@ -27,8 +28,9 @@ public class AuthWiring implements SchemaDirectiveWiring {
         DataFetcher authDataFetcher = new DataFetcher() {
             @Override
             public Object get(DataFetchingEnvironment dataFetchingEnvironment) throws Exception {
-                Map<String, Object> contextMap = dataFetchingEnvironment.getContext();
-                return originalDataFetcher.get(dataFetchingEnvironment);
+                GraphQLContext contextMap = dataFetchingEnvironment.getGraphQlContext();
+                var role = contextMap.get( "role" );
+                return "admin".equals(role) ? originalDataFetcher.get(dataFetchingEnvironment) : null;
             }
         };
         environment.setFieldDataFetcher(authDataFetcher);
